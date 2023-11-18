@@ -1,0 +1,45 @@
+.Auth-container{
+    background-image: url(assets/images/auth.png);
+    background-size: cover;
+    background-position:center center;
+}
+
+.bg-overlay{
+    background: linear-gradient(51.22deg, rgba(55, 140, 47, 0.63) -22.39%, rgba(0, 0, 0, 0.6237) 61.76%);
+}
+
+
+.position-absolute{
+    top: 28%;
+    left: 1%;
+}
+
+
+
+.aftr::after{
+        content: '';
+        width: 1px;
+        height: 25px;
+        background-color:rgba(131, 145, 161, 1);
+        position: absolute;
+        bottom: 20%;
+        left:4%;
+}
+
+.sidebar-container .ps-sidebar-container{
+    background-color: #1f263E;
+    height: 100vh;
+    color: #fff;
+    border-top-right-radius: 15%;
+}
+
+.sidebar-container .ps-sidebar-root{
+border: none;
+}
+
+.sidebar-container .ps-sidebar-container .ps-menu-button:hover{
+    background-color: #009247;
+}
+.side-bg{
+    background-color: #1f263E;
+}
