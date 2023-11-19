@@ -29,7 +29,7 @@ export default function ForgetPass({handleClose}) {
       console.log(response);
       handleClose()
       notify(response.data.message,'success')
-      navigate('/login') 
+      // navigate('/login') 
       setIsLoading(false)
     }).catch((error)=>{
       console.log(error.response);
@@ -50,34 +50,39 @@ export default function ForgetPass({handleClose}) {
                 <p className="text-muted">
                    Enter your details below
                 </p>
-                <div className="form-group my-3 position-relative ">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="Old Password"
                     {...register('oldPassword',{
                       required:true
                     })}
                   />
+                </div>
                   {errors.oldPassword&&errors.oldPassword.type==="required"&&(<span className="text-danger">Old password is required</span>)}
                 </div>
-                <div className="form-group my-3 position-relative">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="New Password"
                     {...register('newPassword',{
                       required:true
                     })}
                   />
+                </div>
                   {errors.newPassword&&errors.newPassword.type==="required"&&(<span className="text-danger">New password is required</span>)}
                 </div>
-                <div className="form-group my-3 position-relative  ">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="Confirm New Password"
                     {...register('confirmNewPassword',{
@@ -90,6 +95,7 @@ export default function ForgetPass({handleClose}) {
                     },
                     )}
                   />
+                </div>
                   {errors.confirmNewPassword&&(<span className="text-danger">{errors.confirmNewPassword?.message}</span>)}
                 </div>
                 <div className="form-group my-3">

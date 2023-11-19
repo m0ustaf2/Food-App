@@ -47,10 +47,11 @@ export default function RequestPassReset() {
                 <p className="text-muted">
                 Please Enter Your Email And Check Your Inbox
                 </p>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-regular fa-envelope  position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="email"
                     placeholder="Enter your E-mail"
                     {...register('email',{
@@ -58,6 +59,7 @@ export default function RequestPassReset() {
                       pattern:/^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/
                     })}
                   />
+                </div>
                   {errors.email&&errors.email.type==="required"&&(<span className="text-danger">email is required</span>)}
                   {errors.email&&errors.email.type==="pattern"&&(<span className="text-danger">invalid email</span>)}
                 </div>

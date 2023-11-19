@@ -14,7 +14,9 @@
     left: 1%;
 }
 
-
+.bgMain{
+    background-color: rgba(247, 247, 247, 1) !important;
+}
 
 .aftr::after{
         content: '';

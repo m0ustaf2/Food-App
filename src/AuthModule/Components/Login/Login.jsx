@@ -48,10 +48,11 @@ export default function Login({saveAdminData}) {
                 <p className="text-muted">
                   Welcome Back! Please enter your details.
                 </p>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-mobile-screen-button position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="email"
                     placeholder="Enter your E-mail"
                     {...register('email',{
@@ -59,19 +60,22 @@ export default function Login({saveAdminData}) {
                       pattern:/^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/
                     })}
                   />
+                </div>
                   {errors.email&&errors.email.type==="required"&&(<span className="text-danger">email is required</span>)}
                   {errors.email&&errors.email.type==="pattern"&&(<span className="text-danger">invalid email</span>)}
                 </div>
-                <div className="form-group my-3 position-relative aftr">
-                <i className="fa-solid fa-lock position-absolute"></i>
+                <div className="form-group my-3 ">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative ">
+                  <i className="fa-solid fa-lock position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="Password"
                     {...register('password',{
                       required:true
                     })}
                   />
+                </div>
                   {errors.password&&errors.password.type==="required"&&(<span className="text-danger">password is required</span>)}
                 </div>
                 <div className="d-flex justify-content-between">

@@ -16,7 +16,6 @@ import { jwtDecode } from 'jwt-decode';
 import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
 import RequestPassReset from './AuthModule/Components/RequestPassReset/RequestPassReset';
 import ResetPass from './AuthModule/Components/ResetPass/ResetPass';
-import ChangePass from './AuthModule/Components/ChangePass/ChangePass';
 
 
 function App() {

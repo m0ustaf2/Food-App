@@ -47,11 +47,11 @@ export default function ResetPass() {
                 <p className="text-muted">
                 Please Enter Your Otp  or Check Your Inbox
                 </p>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3 ">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-regular fa-envelope  position-absolute"></i>
-
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="email"
                     placeholder="Email"
                     {...register('email',{
@@ -59,39 +59,43 @@ export default function ResetPass() {
                       pattern:/^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/
                     })}
                   />
+                </div>
                   {errors.email&&errors.email.type==="required"&&(<span className="text-danger">email is required</span>)}
                   {errors.email&&errors.email.type==="pattern"&&(<span className="text-danger">invalid email</span>)}
                 </div>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="text"
                     placeholder="OTP"
                     {...register('seed',{
                       required:true,
                     })}
                   />
+                </div>
                   {errors.seed&&errors.seed.type==="required"&&(<span className="text-danger">OTP is required</span>)}
                 </div>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
-
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="New Password"
                     {...register('password',{
                       required:true
                     })}
                   />
+                </div>
                   {errors.password&&errors.password.type==="required"&&(<span className="text-danger">Password is required</span>)}
                 </div>
-                <div className="form-group my-3 position-relative aftr">
+                <div className="form-group my-3">
+                <div className="bgMain rounded-3 w-100 ps-4 d-flex justify-content-center position-relative">
                 <i className="fa-solid fa-lock position-absolute"></i>
-
                   <input
-                    className="form-control ps-4 mb-1"
+                    className="form-control bgMain"
                     type="password"
                     placeholder="Confirm New Password"
                     {...register('confirmPassword',{
@@ -103,6 +107,7 @@ export default function ResetPass() {
                           }
                     })}
                   />
+                </div>
                   {errors.confirmPassword&&(<span className="text-danger">{errors.confirmPassword?.message}</span>)}
                 </div>
                 <div className="form-group my-3">
