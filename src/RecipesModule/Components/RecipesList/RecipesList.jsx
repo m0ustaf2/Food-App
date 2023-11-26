@@ -33,20 +33,26 @@ export default function RecipesList() {
 
   const showAddModal = () => {
     setModalState("add-modal");
+    getCategories();
+    getAllTags();
   };
   //-----------------------------------CreateRecipe----------------------------
   const onSubmit = (data) => {
     console.log(data);
     setIsLoading(true);
     axios
-      .post(`${baseUrl}/api/v1/Recipe/`, {...data,recipeImage:data.recipeImage[0]}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          "Content-Type":"multipart/form-data"
-        },
-      })
+      .post(
+        `${baseUrl}/api/v1/Recipe/`,
+        { ...data, recipeImage: data.recipeImage[0] },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
       .then((response) => {
-        console.log(response)
+        console.log(response);
         handleClose();
         getAllRecipes();
         setIsLoading(false);
@@ -110,7 +116,7 @@ export default function RecipesList() {
         },
       })
       .then((response) => {
-        // console.log(response.data);
+        console.log(response.data);
         setTagsList(response?.data);
       })
       .catch((error) => {
@@ -129,7 +135,7 @@ export default function RecipesList() {
       })
       .then((response) => {
         setCategoriesList(response?.data?.data);
-        // console.log(response?.data?.data);
+        console.log(response?.data?.data);
       })
       .catch((error) => {
         console.log(error);
@@ -137,12 +143,8 @@ export default function RecipesList() {
       });
   };
 
-
-
   useEffect(() => {
     getAllRecipes();
-    getCategories();
-    getAllTags();
   }, []);
 
   return (
@@ -152,13 +154,13 @@ export default function RecipesList() {
         title={"Items"}
         paragraph={`You can now add your items that any user can order it from the Application and you can edit`}
       />
-{/* ************************Add Modal******************************* */}
+      {/* ************************Add Modal******************************* */}
       <Modal show={modalState == "add-modal"} onHide={handleClose}>
         <Modal.Body>
           <h1>Add Recipe</h1>
-          <form   onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-group my-5">
-{/* **********************NameInput************************ */}
+              {/* **********************NameInput************************ */}
               <input
                 type="text"
                 placeholder="Enter Recipe Name"
@@ -177,7 +179,7 @@ export default function RecipesList() {
               {errors.name && errors.name.type === "minLength" && (
                 <span className="text-danger">{errors.name?.message}</span>
               )}
-{/* **********************PriceInput************************ */}
+              {/* **********************PriceInput************************ */}
               <input
                 type="number"
                 placeholder="Enter Recipe Price"
@@ -196,27 +198,25 @@ export default function RecipesList() {
               {errors.price && (
                 <span className="text-danger">{errors.price?.message}</span>
               )}
-{/* **********************TagsIDInput************************ */}
-              <input
-                list="tagsId"
-                className="form-control bgMain  my-2"
-                placeholder="Choose Tagig"
-                name="tagId"
-                id="tagId"
+              {/* **********************TagsIDInput************************ */}
+              <select
                 {...register("tagId", {
                   required: true,
                 })}
-              />
-              <datalist id="tagsId">
+                className="form-select bgMain  my-2 "
+              >
+                <option value={""}>PLZ,Choose Tagig 👋</option>
                 {TagsList.map((tag, index) => (
-                  <option key={index} value={tag.id} />
+                  <option value={tag.id} key={index}>
+                    {tag.name}
+                  </option>
                 ))}
-              </datalist>
+              </select>
               {errors.tagId && errors.tagId.type === "required" && (
                 <span className="text-danger">tagId is required!!</span>
               )}
-{/* **********************CategoriesIDInput************************ */}
-              <input
+              {/* **********************CategoriesIDInput************************ */}
+              {/* <input
                 list="categoriessIds"
                 className="form-control bgMain  my-2"
                 placeholder="Choose categorieIds"
@@ -230,15 +230,28 @@ export default function RecipesList() {
                 {categoriesList.map((category, index) => (
                   <option key={index} value={category.id} />
                 ))}
-              </datalist>
+              </datalist> */}
 
-              
-              {errors.categoriesIds && (
-                <span className="text-danger">
-                  {errors.categoriesIds?.message}
-                </span>
-              )}
-{/* **********************textAreaInput************************ */}
+              <select
+                {...register("categoriesIds", {
+                  required: true,
+                })}
+                className="form-select bgMain  my-2 "
+              >
+                <option value={""}> Please,Choose categoriesIds 👋</option>
+                {categoriesList.map((category, index) => (
+                  <option value={category.id} key={index}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {errors.categoriesIds &&
+                errors.categoriesIds.type === "required" && (
+                  <span className="text-danger">
+                    categoriesIds is required!!
+                  </span>
+                )}
+              {/* **********************textAreaInput************************ */}
               <textarea
                 className="form-control my-2 bgMain"
                 placeholder="Recipe Description"
@@ -252,13 +265,14 @@ export default function RecipesList() {
                 </span>
               )}
 
-{/* **********************imageInput************************ */}
+              {/* **********************imageInput************************ */}
               <input
                 type="file"
                 accept="image/*"
                 className="form-control my-2 bgMain"
                 {...register("recipeImage")}
               />
+
             </div>
             <hr />
             <div className="form-group my-3 text-end">
@@ -278,7 +292,7 @@ export default function RecipesList() {
           </form>
         </Modal.Body>
       </Modal>
-{/* ************************Delete Modal******************************* */}
+      {/* ************************Delete Modal******************************* */}
       <Modal show={modalState == "delete-modal"} onHide={handleClose}>
         <Modal.Body>
           <div className="text-center">
@@ -306,7 +320,6 @@ export default function RecipesList() {
           </div>
         </Modal.Body>
       </Modal>
-
 
       <div className="row mx-2 p-3">
         <div className="col-md-6">
@@ -338,9 +351,9 @@ export default function RecipesList() {
                 </tr>
               </thead>
               <tbody>
-                {RecipesList.map((Recipe) => (
+                {RecipesList.map((Recipe, index) => (
                   <tr key={Recipe?.id}>
-                    <th scope="row">{Recipe.id}</th>
+                    <th scope="row">{index + 1}</th>
                     <td>{Recipe?.name}</td>
                     <td>
                       <div className="img-container">
@@ -364,7 +377,7 @@ export default function RecipesList() {
                     <td>{Recipe?.category[0]?.name}</td>
                     <td>{Recipe?.tag?.name}</td>
                     <td>
-                      <FaRegEdit className="text-warning mx-2" />
+                      {/* <FaRegEdit className="text-warning mx-2" /> */}
                       <FaRegTrashCan
                         onClick={() => showDeleteModal(Recipe.id)}
                         className="text-danger"
