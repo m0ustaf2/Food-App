@@ -16,7 +16,7 @@ export default function Navbar({adminData}) {
           <a className="nav-link active" aria-current="page" href="#">
           <div className="d-flex justify-content-between">
           <img className='w-25' src={avatar} alt="user-img" />
-            {adminData.userName}
+            {adminData?.userName}
           </div>
           </a>
         </li>

@@ -1,29 +1,35 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Login from './AuthModule/Components/Login/Login';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import MasterLayout from './SharedModule/Components/MasterLayout/MasterLayout';
-import NotFound from './SharedModule/Components/NotFound/NotFound';
-import RecipesList from './RecipesModule/Components/RecipesList/RecipesList';
-import UsersList from './UsersModule/Components/UsersList/UsersList';
-import Home from './HomeModule/Components/Home/Home';
-import CategoriesList from './CategoriesModule/Components/CategoriesList/CategoriesList';
-import AuthLayout from './SharedModule/Components/AuthLayout/AuthLayout';
-import { ToastContainer } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
-import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
+import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import './App.css';
+import Login from './AuthModule/Components/Login/Login';
 import RequestPassReset from './AuthModule/Components/RequestPassReset/RequestPassReset';
 import ResetPass from './AuthModule/Components/ResetPass/ResetPass';
+import CategoriesList from './CategoriesModule/Components/CategoriesList/CategoriesList';
+import Home from './HomeModule/Components/Home/Home';
+import RecipesList from './RecipesModule/Components/RecipesList/RecipesList';
+import AuthLayout from './SharedModule/Components/AuthLayout/AuthLayout';
+import MasterLayout from './SharedModule/Components/MasterLayout/MasterLayout';
+import NotFound from './SharedModule/Components/NotFound/NotFound';
+import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
+import UsersList from './UsersModule/Components/UsersList/UsersList';
 
 
 function App() {
-const[adminData,setAdminData]=useState(null)
+const[adminData,setAdminData]=useState({})
+
+
 let saveAdminData=()=>{
   let encodedToken=localStorage.getItem('adminToken');
-  let decodedToken=jwtDecode(encodedToken);
-  setAdminData(decodedToken)
+  try {
+    let decodedToken=jwtDecode(encodedToken);
+    setAdminData(decodedToken)
+  } catch (error) {
+    setAdminData(null)
+  }
+  
 }
 
 useEffect(() => {
@@ -61,6 +67,7 @@ useEffect(() => {
 
   return (
     <>
+    <Toaster/>
     <ToastContainer theme='dark'
     autoClose={2000}/>
     <RouterProvider router={routes} />

@@ -1,5 +1,5 @@
 .Auth-container{
-    background-image: url(assets/images/auth.png);
+    background-image: url(assets/images/auth.jpeg);
     background-size: cover;
     background-position:center center;
 }
@@ -7,8 +7,17 @@
 .bg-overlay{
     background: linear-gradient(51.22deg, rgba(55, 140, 47, 0.63) -22.39%, rgba(0, 0, 0, 0.6237) 61.76%);
 }
-
-
+.home-container{
+background-color: rgba(240, 255, 239, 1);
+}
+.text-header{
+    color:rgba(223, 224, 224, 1);
+}
+.header-content{
+background-image: url(assets/images/bg-header.png);
+background-size: cover;
+background-position:center center;
+}
 .position-absolute{
     top: 28%;
     left: 1%;
@@ -18,25 +27,16 @@
     background-color: rgba(247, 247, 247, 1) !important;
 }
 
-.aftr::after{
-        content: '';
-        width: 1px;
-        height: 25px;
-        background-color:rgba(131, 145, 161, 1);
-        position: absolute;
-        bottom: 20%;
-        left:4%;
-}
 
 .sidebar-container .ps-sidebar-container{
     background-color: #1f263E;
-    height: 100vh;
     color: #fff;
-    border-top-right-radius: 15%;
+    border-top-right-radius:50px;
 }
 
 .sidebar-container .ps-sidebar-root{
 border: none;
+height: 100vh;
 }
 
 .sidebar-container .ps-sidebar-container .ps-menu-button:hover{
@@ -45,3 +45,17 @@ border: none;
 .side-bg{
     background-color: #1f263E;
 }
+
+
+input:focus{
+    box-shadow: none !important;
+    background-color: rgba(247, 247, 247, 1) !important;
+}
+
+
+.img-container{
+    width: 50px;
+}
+textarea {
+    resize: none !important;
+  }
