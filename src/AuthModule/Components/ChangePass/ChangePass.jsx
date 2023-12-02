@@ -11,7 +11,7 @@ export default function ForgetPass({handleClose}) {
   const [showPass,setShowPass]=useState(false);
   const [passType,setPassType]=useState('password');
 
-  const baseUrl='http://upskilling-egypt.com:3002';
+  const baseUrl='https://upskilling-egypt.com:443';
   const navigate=useNavigate();
   const {
     register,

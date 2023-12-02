@@ -33,7 +33,9 @@ background-position:center center;
     color: #fff;
     border-top-right-radius:50px;
 }
-
+.side{
+    border-top-right-radius:60px;
+}
 .sidebar-container .ps-sidebar-root{
 border: none;
 height: 100vh;

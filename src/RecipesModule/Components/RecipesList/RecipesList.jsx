@@ -10,31 +10,47 @@ import noData from "../../../assets/images/nodata.png";
 import { useForm } from "react-hook-form";
 
 export default function RecipesList() {
-  const baseUrl = "http://upskilling-egypt.com:3002";
+  const baseUrl = "https://upskilling-egypt.com:443";
   const [RecipesList, setRecipesList] = useState([]);
   const [TagsList, setTagsList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
-
   const [modalState, setModalState] = useState("close");
   const [itemId, setItemId] = useState(0);
-  const handleClose = () => setModalState("close");
+  const [recipe, setRecipe] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [pagesArray, setPagesArray] = useState([]);
+  const [searchString, setSearchString] = useState("");
+  const [selectedTagId, setselectedTagId] = useState(0);
+  const [selectedCatId, setselectedCatId] = useState(0);
+
+  const handleClose = () => setModalState("close");
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm();
-
+  
   const showDeleteModal = (id) => {
     setItemId(id);
     setModalState("delete-modal");
   };
+  const showUpdateModal = (item) => {
+    console.log(item);
+    setRecipe(item);
+    setItemId(item.id);
+    setValue("name", item.name);
+    setValue("price", item.price);
+    setValue("tagId", item.tag?.id); //tag:{id: 3, name: 'Snack'}
+    setValue("categoriesIds", item.category[0]?.id); //0:{id: 350, name: 'salad'}
+    setValue("description", item.description);
+    setValue("recipeImage", item.recipeImage);
+    setModalState("update-modal");
+  };
 
   const showAddModal = () => {
     setModalState("add-modal");
-    getCategories();
-    getAllTags();
   };
   //-----------------------------------CreateRecipe----------------------------
   const onSubmit = (data) => {
@@ -65,18 +81,34 @@ export default function RecipesList() {
         toast.error("Axios Error!!!");
       });
   };
-
   //--------------------getAllRecipes---------------------
-  const getAllRecipes = () => {
+  const getAllRecipes = (pageNo, name, tagId, categoryId) => {
     axios
-      .get(`${baseUrl}/api/v1/Recipe/?pageSize=10&pageNumber=1`, {
+      .get(`${baseUrl}/api/v1/Recipe/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        },
+        params: {
+          pageSize: 5,
+          pageNumber: pageNo,
+          name: name,
+          tagId: tagId,
+          categoryId: categoryId,
         },
       })
       .then((response) => {
         setRecipesList(response?.data?.data);
-        // console.log(response);
+        console.log(response?.data?.data);
+        console.log(
+          Array(response.data.totalNumberOfPages)
+            .fill()
+            .map((_, i) => i + 1)
+        );
+        setPagesArray(
+          Array(response.data.totalNumberOfPages)
+            .fill()
+            .map((_, i) => i + 1)
+        );
       })
       .catch((error) => {
         console.log(error);
@@ -94,10 +126,38 @@ export default function RecipesList() {
         },
       })
       .then((response) => {
-        // console.log(response);
+        console.log(response);
         handleClose();
         setIsLoading(false);
         toast.success("Recipe deleted successfully");
+        getAllRecipes();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("Axios error!!");
+        setIsLoading(false);
+      });
+  };
+  // ---------------------updateRecipe--------------------
+  const updateRecipe = (data) => {
+    console.log(data);
+    setIsLoading(true);
+    axios
+      .put(
+        `${baseUrl}/api/v1/Recipe/${itemId}`,
+        { ...data, recipeImage: data.recipeImage[0] },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        handleClose();
+        setIsLoading(false);
+        toast.success("Recipe updated successfully");
         getAllRecipes();
       })
       .catch((error) => {
@@ -128,7 +188,7 @@ export default function RecipesList() {
   //----------------getall categories---------
   const getCategories = () => {
     axios
-      .get(`${baseUrl}/api/v1/Category/?pageSize=10&pageNumber=1`, {
+      .get(`${baseUrl}/api/v1/Category/?pageSize=20&pageNumber=1`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
@@ -142,9 +202,27 @@ export default function RecipesList() {
         toast.error("Axios Error!!!");
       });
   };
-
+  // *********************searchByName*******************
+  const getNameValue = (input) => {
+    console.log(input.target.value);
+    setSearchString(input.target.value);
+    getAllRecipes(1, input.target.value, selectedTagId, selectedCatId);
+  };
+  // ********************SearchByTagId********************
+  const getTagValue = (select) => {
+    setselectedTagId(select.target.value);
+    getAllRecipes(1, searchString, select.target.value, selectedCatId);
+  };
+  // ********************SearchByCategoryId********************
+  const getCategoryValue = (select) => {
+    setselectedCatId(select.target.value);
+    getAllRecipes(1, searchString, selectedTagId, select.target.value);
+  };
+  // -------------------------------------------------
   useEffect(() => {
     getAllRecipes();
+    getCategories();
+    getAllTags();
   }, []);
 
   return (
@@ -159,6 +237,142 @@ export default function RecipesList() {
         <Modal.Body>
           <h1>Add Recipe</h1>
           <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="form-group my-5">
+              {/* **********************NameInput************************ */}
+              <input
+                type="text"
+                placeholder="Enter Recipe Name"
+                className="form-control my-2 bgMain"
+                {...register("name", {
+                  required: true,
+                  minLength: {
+                    value: 2,
+                    message: "Recipe name shouldn't be less than two character",
+                  },
+                })}
+              />
+              {errors.name && errors.name.type === "required" && (
+                <span className="text-danger">Recipe name is required!!</span>
+              )}
+              {errors.name && errors.name.type === "minLength" && (
+                <span className="text-danger">{errors.name?.message}</span>
+              )}
+              {/* **********************PriceInput************************ */}
+              <input
+                type="number"
+                placeholder="Enter Recipe Price"
+                className="form-control my-2 bgMain"
+                {...register("price", {
+                  required: true,
+                  valueAsNumber: true,
+                  validate: {
+                    positive: (value) =>
+                      value > 0 || "price shouldn't be less than Zero",
+                  },
+                })}
+              />
+              {errors.price && errors.price.type === "required" && (
+                <span className="text-danger">Price is required!!</span>
+              )}
+              {errors.price && (
+                <span className="text-danger">{errors.price?.message}</span>
+              )}
+              {/* **********************TagsIDInput************************ */}
+              <select
+                {...register("tagId", {
+                  required: true,
+                  valueAsNumber: true,
+                })}
+                className="form-select bgMain  my-2 "
+              >
+                <option value={""}>Please,Choose Tagig 👋</option>
+                {TagsList.map((tag, index) => (
+                  <option value={tag.id} key={index}>
+                    {tag.name}
+                  </option>
+                ))}
+              </select>
+              {errors.tagId && errors.tagId.type === "required" && (
+                <span className="text-danger">tagId is required!!</span>
+              )}
+              {/* **********************CategoriesIDInput************************ */}
+              <select
+                {...register("categoriesIds", {
+                  required: true,
+                  valueAsNumber: true,
+                })}
+                className="form-select bgMain  my-2 "
+              >
+                <option value={""}> Please,Choose categoriesIds 👋</option>
+                {categoriesList.map((category, index) => (
+                  <option value={category.id} key={index}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {errors.categoriesIds &&
+                errors.categoriesIds.type === "required" && (
+                  <span className="text-danger">
+                    categoriesIds is required!!
+                  </span>
+                )}
+              {/* **********************textAreaInput************************ */}
+              <textarea
+                className="form-control my-2 bgMain"
+                placeholder="Recipe Description"
+                rows="4"
+                cols="50"
+                {...register("description", {
+                  required: true,
+                  pattern: {
+                    value: /^[A-Za-z0-9\s]{4,}$/,
+                    message:
+                      "You description must contains only letters, digits, and spaces, and it enforces a minimum length of four characters!!",
+                  },
+                })}
+              ></textarea>
+              {errors.description && errors.description.type === "required" && (
+                <span className="text-danger">
+                  Recipe description is required!!
+                </span>
+              )}
+              {errors.description && errors.description.type === "pattern" && (
+                <span className="text-danger">
+                  {errors?.description?.message}
+                </span>
+              )}
+
+              {/* **********************imageInput************************ */}
+              <input
+                type="file"
+                accept="image/*"
+                className="form-control my-2 bgMain"
+                {...register("recipeImage")}
+              />
+            </div>
+            <hr />
+            <div className="form-group my-3 text-end">
+              <button
+                type="submit"
+                className={
+                  "btn btn-success w-25" + (isLoading ? " disabled" : " ")
+                }
+              >
+                {isLoading == true ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  "Add"
+                )}
+              </button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+      {/* ************************Update Modal******************************* */}
+      <Modal show={modalState == "update-modal"} onHide={handleClose}>
+        <Modal.Body>
+          <h1>Update Recipe</h1>
+          <form onSubmit={handleSubmit(updateRecipe)}>
             <div className="form-group my-5">
               {/* **********************NameInput************************ */}
               <input
@@ -216,22 +430,6 @@ export default function RecipesList() {
                 <span className="text-danger">tagId is required!!</span>
               )}
               {/* **********************CategoriesIDInput************************ */}
-              {/* <input
-                list="categoriessIds"
-                className="form-control bgMain  my-2"
-                placeholder="Choose categorieIds"
-                name="categoriesIds"
-                id="categoriesIds"
-                {...register("categoriesIds", {
-                  required: true,
-                })}
-              />
-              <datalist id="categoriessIds">
-                {categoriesList.map((category, index) => (
-                  <option key={index} value={category.id} />
-                ))}
-              </datalist> */}
-
               <select
                 {...register("categoriesIds", {
                   required: true,
@@ -257,11 +455,23 @@ export default function RecipesList() {
                 placeholder="Recipe Description"
                 rows="4"
                 cols="50"
-                {...register("description", { required: true })}
+                {...register("description", {
+                  required: true,
+                  pattern: {
+                    value: /^[A-Za-z0-9\s]{4,}$/,
+                    message:
+                      "You description must contains only letters, digits, and spaces, and it enforces a minimum length of four characters!!",
+                  },
+                })}
               ></textarea>
               {errors.description && errors.description.type === "required" && (
                 <span className="text-danger">
                   Recipe description is required!!
+                </span>
+              )}
+              {errors.description && errors.description.type === "pattern" && (
+                <span className="text-danger">
+                  {errors?.description?.message}
                 </span>
               )}
 
@@ -272,7 +482,17 @@ export default function RecipesList() {
                 className="form-control my-2 bgMain"
                 {...register("recipeImage")}
               />
-
+              <div className="img-container">
+                {recipe?.imagePath ? (
+                  <img
+                    className="img-fluid"
+                    src={`${baseUrl}/` + recipe?.imagePath}
+                    alt="recipe-img"
+                  />
+                ) : (
+                  <img className="img-fluid" src={noData} alt="recipe-img" />
+                )}
+              </div>
             </div>
             <hr />
             <div className="form-group my-3 text-end">
@@ -285,7 +505,7 @@ export default function RecipesList() {
                 {isLoading == true ? (
                   <i className="fas fa-spinner fa-spin"></i>
                 ) : (
-                  "Add"
+                  "Update"
                 )}
               </button>
             </div>
@@ -324,7 +544,7 @@ export default function RecipesList() {
       <div className="row mx-2 p-3">
         <div className="col-md-6">
           <div>
-            <h6>Recipes Table Detailes</h6>
+            <h6 className="fw-bold">Recipes Table Detailes</h6>
             <span>You can check all details</span>
           </div>
         </div>
@@ -336,57 +556,121 @@ export default function RecipesList() {
           </div>
         </div>
         <div>
-          {RecipesList.length > 0 ? (
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">Id</th>
-                  <th scope="col">Item Name</th>
-                  <th scope="col">Image</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Category</th>
-                  <th scope="col">Tag</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RecipesList.map((Recipe, index) => (
-                  <tr key={Recipe?.id}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{Recipe?.name}</td>
-                    <td>
-                      <div className="img-container">
-                        {Recipe.imagePath ? (
-                          <img
-                            className="img-fluid"
-                            src={`${baseUrl}/` + Recipe.imagePath}
-                            alt="recipe-img"
-                          />
-                        ) : (
-                          <img
-                            className="img-fluid"
-                            src={noData}
-                            alt="recipe-img"
-                          />
-                        )}
-                      </div>
-                    </td>
-                    <td>{Recipe?.price}</td>
-                    <td>{Recipe?.description}</td>
-                    <td>{Recipe?.category[0]?.name}</td>
-                    <td>{Recipe?.tag?.name}</td>
-                    <td>
-                      {/* <FaRegEdit className="text-warning mx-2" /> */}
-                      <FaRegTrashCan
-                        onClick={() => showDeleteModal(Recipe.id)}
-                        className="text-danger"
-                      />
-                    </td>
-                  </tr>
+          <div className="row my-2">
+            <div className="col-md-4">
+              <input
+                onChange={getNameValue}
+                placeholder="Search by Recipe name..."
+                className="form-control"
+                type="text"
+              />
+            </div>
+            <div className="col-md-4">
+              <select onChange={getTagValue} className="form-select">
+                <option value={""}>Search by Tagig 👋</option>
+                {TagsList.map((tag, index) => (
+                  <option value={tag.id} key={index}>
+                    {tag.name}
+                  </option>
                 ))}
-              </tbody>
-            </table>
+              </select>
+            </div>
+            <div className="col-md-4">
+              <select onChange={getCategoryValue} className="form-select">
+                <option value={""}>Search by categoriesIds 👋</option>
+                {categoriesList.map((category, index) => (
+                  <option value={category.id} key={index}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {RecipesList.length > 0 ? (
+            <div>
+              <table className="table table-responsive table-striped ">
+                <thead>
+                  <tr>
+                    <th className="table-secondary p-3" scope="col">
+                      #
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Item Name
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Image
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Price
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Description
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Category
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Tag
+                    </th>
+                    <th className="table-secondary p-3" scope="col">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {RecipesList.map((Recipe, index) => (
+                    <tr key={Recipe?.id}>
+                      <th scope="row">{index + 1}</th>
+                      <td>{Recipe?.name}</td>
+                      <td>
+                        <div className="img-container">
+                          {Recipe.imagePath ? (
+                            <img
+                              className="img-fluid rounded-2"
+                              src={`${baseUrl}/` + Recipe.imagePath}
+                              alt="recipe-img"
+                            />
+                          ) : (
+                            <img
+                              className="img-fluid"
+                              src={noData}
+                              alt="recipe-img"
+                            />
+                          )}
+                        </div>
+                      </td>
+                      <td>{Recipe?.price}</td>
+                      <td>{Recipe?.description}</td>
+                      <td>{Recipe?.category[0]?.name}</td>
+                      <td>{Recipe?.tag?.name}</td>
+                      <td>
+                        <FaRegEdit
+                          onClick={() => showUpdateModal(Recipe)}
+                          className="text-warning mx-2"
+                        />
+                        <FaRegTrashCan
+                          onClick={() => showDeleteModal(Recipe.id)}
+                          className="text-danger"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <nav aria-label="...">
+                <ul className="pagination pagination-sm">
+                  {pagesArray.map((pageNo, index) => (
+                    <li
+                      key={index}
+                      onClick={() => getAllRecipes(pageNo, searchString)}
+                      className="page-item"
+                    >
+                      <a className="page-link">{pageNo}</a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
           ) : (
             <NoData />
           )}

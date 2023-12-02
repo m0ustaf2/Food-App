@@ -45,7 +45,7 @@ useEffect(() => {
       element:<ProtectedRoute adminData={adminData}><MasterLayout adminData={adminData}/></ProtectedRoute>,
       errorElement:<NotFound/>,
       children:[
-        {index:true,element:<Home/>},
+        {index:true,element:<Home  adminData={adminData} />},
         {path:'users',element:<UsersList/>},
         {path:'recipes',element:<RecipesList/>},
         {path:'categories',element:<CategoriesList/>},

@@ -6,13 +6,10 @@ import SideBar from "./../SideBar/SideBar";
 export default function MasterLayout({ adminData }) {
   return (
     <>
-      <div className="container-fluid">
+      <div>
         <div className="d-flex">
-          <div className="row">
-            <div className="col-md-2 vh-100 side-bg">
-              <SideBar />
-            </div>
-            <div className="col-md-10 bg-transparent"></div>
+          <div className="side-bg side">
+          <SideBar />
           </div>
           <div className="w-100">
             <Navbar adminData={adminData} />

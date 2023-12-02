@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
 
 export default function Login({ saveAdminData }) {
 
@@ -15,7 +13,7 @@ export default function Login({ saveAdminData }) {
 
 
 
-  const baseUrl = "http://upskilling-egypt.com:3002";
+  const baseUrl = "https://upskilling-egypt.com:443";
   const navigate = useNavigate();
   const {
     register,

@@ -10,11 +10,13 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import noData from "../../../assets/images/nodata.png";
 
 export default function CategoriesList() {
-  const baseUrl = "http://upskilling-egypt.com:3002";
+  const baseUrl = "https://upskilling-egypt.com:443";
   const [categoriesList, setCategoriesList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modelState, setModelState] = useState("close");
   const [itemId, setItemId] = useState(0);
+  const [pagesArray, setPagesArray] = useState([]);
+  const [searchString, setSearchString] = useState("");
 
   const showAddModal = () => {
     setModelState("modal-one");
@@ -26,10 +28,10 @@ export default function CategoriesList() {
   };
   const showUpdataModal = (categoryItem) => {
     setItemId(categoryItem.id);
-    setValue("name",categoryItem.name)
+    setValue("name", categoryItem.name);
     setModelState("modal-three");
   };
-  
+
   const handleClose = () => setModelState("close");
 
   const {
@@ -37,7 +39,7 @@ export default function CategoriesList() {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
+    setValue,
   } = useForm();
 
   //-----------------------------------AddCategory----------------------------
@@ -50,6 +52,7 @@ export default function CategoriesList() {
         },
       })
       .then((response) => {
+        console.log(response);
         handleClose();
         getCategories();
         setIsLoading(false);
@@ -64,15 +67,30 @@ export default function CategoriesList() {
   };
 
   //-----------------------------------ShowCategories----------------------------
-  const getCategories = () => {
+  const getCategories = (pageNo,name) => {
     axios
-      .get(`${baseUrl}/api/v1/Category/?pageSize=10&pageNumber=1`, {
+      .get(`${baseUrl}/api/v1/Category/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        },
+        params: {
+          pageSize: 5,
+          pageNumber: pageNo,
+          name:name
         },
       })
       .then((response) => {
         setCategoriesList(response.data.data);
+        console.log(
+          Array(response.data.totalNumberOfPages)
+            .fill()
+            .map((_, i) => i + 1)
+        );
+        setPagesArray(
+          Array(response.data.totalNumberOfPages)
+            .fill()
+            .map((_, i) => i + 1)
+        );
       })
       .catch((error) => {
         console.log(error);
@@ -88,46 +106,50 @@ export default function CategoriesList() {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
       })
-      .then((response) =>{
+      .then((response) => {
         console.log(response);
         handleClose();
         setIsLoading(false);
-        toast.success("Category deleted successfully")
+        toast.success("Category deleted successfully");
         getCategories();
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Axios error!!")
+        toast.error("Axios error!!");
         setIsLoading(false);
       });
   };
 
-   // ----------------------------------updateCategory------------------------------
-   const updateCategory = (data) => {
+  // ----------------------------------updateCategory------------------------------
+  const updateCategory = (data) => {
     setIsLoading(true);
     axios
-      .put(`${baseUrl}/api/v1/Category/${itemId}`,data, {
+      .put(`${baseUrl}/api/v1/Category/${itemId}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
       })
-      .then((response) =>{
+      .then((response) => {
         console.log(response);
         handleClose();
         setIsLoading(false);
-        toast.success("Category updated successfully")
+        toast.success("Category updated successfully");
         getCategories();
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Axios error!!")
+        toast.error("Axios error!!");
         setIsLoading(false);
       });
   };
 
-
+  // *********************searchByName*******************
+  const getNameValue=(input)=>{
+    setSearchString(input.target.value)
+getCategories(1,input.target.value);
+  }
   useEffect(() => {
-    getCategories();
+    getCategories(1);
   }, []);
 
   return (
@@ -181,7 +203,12 @@ export default function CategoriesList() {
             </span>
             <hr />
             <div className="form-group my-3 text-end">
-              <button onClick={deleteCategory}   className={"btn btn-outline-danger" + (isLoading ? " disabled" : "")}>
+              <button
+                onClick={deleteCategory}
+                className={
+                  "btn btn-outline-danger" + (isLoading ? " disabled" : "")
+                }
+              >
                 {isLoading == true ? (
                   <i className="fas fa-spinner fa-spin"></i>
                 ) : (
@@ -241,31 +268,49 @@ export default function CategoriesList() {
           </div>
         </div>
         <div>
+          <input onChange={getNameValue} placeholder="Search by name..." className="form-control my-2" type="text" />
           {categoriesList.length > 0 ? (
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">Id</th>
-                  <th scope="col">Category Name</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categoriesList.map((category) => (
-                  <tr key={category.id}>
-                    <th scope="row">{category.id}</th>
-                    <td>{category.name}</td>
-                    <td>
-                      <FaRegEdit onClick={()=>showUpdataModal(category)} className="text-warning mx-2" />
-                      <FaRegTrashCan
-                        onClick={() => showDeleteModal(category.id)}
-                        className="text-danger"
-                      />
-                    </td>
+            <div>
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Category Name</th>
+                    <th scope="col">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {categoriesList.map((category, index) => (
+                    <tr key={category.id}>
+                      <th scope="row">{index + 1}</th>
+                      <td>{category.name}</td>
+                      <td>
+                        <FaRegEdit
+                          onClick={() => showUpdataModal(category)}
+                          className="text-warning mx-2"
+                        />
+                        <FaRegTrashCan
+                          onClick={() => showDeleteModal(category.id)}
+                          className="text-danger"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <nav aria-label="...">
+                <ul className="pagination pagination-sm">
+                  {pagesArray.map((pageNo ,index)=>
+                    <li key={index}
+                    onClick={()=>getCategories(pageNo,searchString)}
+                    className="page-item">
+                      <a className="page-link">{pageNo}</a>
+                      </li>
+                  )}
+                 
+                </ul>
+              </nav>
+            </div>
           ) : (
             <NoData />
           )}

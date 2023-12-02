@@ -3,10 +3,10 @@ import Header from '../../../SharedModule/Components/Header/Header'
 import { FaArrowRight } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
-export default function Home() {
+export default function Home({adminData}) {
   return (
     <>
-    <Header prefix={"Welcome"} title={"Upskilling!"} paragraph={`This is a welcoming screen for the entry of the application , you can now see the options`}/>
+    <Header prefix={"Welcome"} title={adminData.userName} paragraph={`This is a welcoming screen for the entry of the application , you can now see the options`}/>
     
     <div className="row  home-container mx-2 py-4 rounded-2 align-content-center align-items-center">
       <div className="col-md-6">
