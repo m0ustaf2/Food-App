@@ -4,13 +4,15 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useContext } from "react";
+import { AuthContext } from "../../../Context/AuthContext";
+import { Helmet } from "react-helmet";
 
 export default function ResetPass() {
+  let { baseUrl } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPass,setShowPass]=useState(false);
-  const [passType,setPassType]=useState('password');
-
-  const baseUrl = "https://upskilling-egypt.com:443";
+  const [showPass, setShowPass] = useState(false);
+  const [passType, setPassType] = useState("password");
   const navigate = useNavigate();
   const {
     register,
@@ -25,28 +27,32 @@ export default function ResetPass() {
     axios
       .post(`${baseUrl}/api/v1/Users/Reset`, data)
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         toast.success(response.data.message);
         navigate("/login");
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error.response);
+        // console.log(error.response);
         toast.error(error.response.data.message);
         setIsLoading(false);
       });
   };
 
   useEffect(() => {
-    if(showPass){
-      setPassType('text');
-      return; 
+    if (showPass) {
+      setPassType("text");
+      return;
     }
-    setPassType('password');
-  }, [showPass])
-  
+    setPassType("password");
+  }, [showPass]);
+
   return (
     <>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Reset Password</title>
+      </Helmet>
       <div className="Auth-container  container-fluid">
         <div className="row bg-overlay vh-100 justify-content-center align-items-center ">
           <div className="col-md-6">
@@ -60,16 +66,16 @@ export default function ResetPass() {
                   Please Enter Your Otp or Check Your Inbox
                 </p>
                 <div className="form-group my-3 position-relative">
-                <i className="fa-regular fa-envelope  position-absolute"></i>
-                    <input
-                      className="form-control bgMain ps-4"
-                      type="email"
-                      placeholder="Email"
-                      {...register("email", {
-                        required: true,
-                        pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
-                      })}
-                    />
+                  <i className="fa-regular fa-envelope  position-absolute"></i>
+                  <input
+                    className="form-control bgMain ps-4"
+                    type="email"
+                    placeholder="Email"
+                    {...register("email", {
+                      required: true,
+                      pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                    })}
+                  />
                   {errors.email && errors.email.type === "required" && (
                     <span className="text-danger">email is required!!</span>
                   )}
@@ -78,31 +84,31 @@ export default function ResetPass() {
                   )}
                 </div>
                 <div className="form-group my-3 position-relative">
-                <i className="fa-solid fa-lock position-absolute"></i>
-                    <input
-                      className="form-control bgMain ps-4"
-                      type="text"
-                      placeholder="OTP"
-                      {...register("seed", {
-                        required: true,
-                      })}
-                    />
+                  <i className="fa-solid fa-lock position-absolute"></i>
+                  <input
+                    className="form-control bgMain ps-4"
+                    type="text"
+                    placeholder="OTP"
+                    {...register("seed", {
+                      required: true,
+                    })}
+                  />
                   {errors.seed && errors.seed.type === "required" && (
                     <span className="text-danger">OTP is required!!</span>
                   )}
                 </div>
                 <div className="form-group my-3 position-relative ">
-                <i className="fa-solid fa-lock position-absolute"></i>
-                    <input
-                      className="form-control bgMain ps-4"
-                      type={passType}
-                      placeholder="New Password"
-                      {...register("password", {
-                        required: true,
-                        pattern:
-                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]{6,}$/,
-                      })}
-                    />
+                  <i className="fa-solid fa-lock position-absolute"></i>
+                  <input
+                    className="form-control bgMain ps-4"
+                    type={passType}
+                    placeholder="New Password"
+                    {...register("password", {
+                      required: true,
+                      pattern:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]{6,}$/,
+                    })}
+                  />
                   {errors.password && errors.password.type === "required" && (
                     <span className="text-danger">Password is required!!</span>
                   )}
@@ -115,50 +121,63 @@ export default function ResetPass() {
                   )}
                 </div>
                 <div className="form-group my-3 position-relative">
-                <i className="fa-solid fa-lock position-absolute"></i>
-                    <input
-                      className="form-control bgMain ps-4"
-                      type={passType}
-                      placeholder="Confirm New Password"
-                      {...register("confirmPassword", {
-                        required: true,
-                        pattern:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]{6,}$/,
-                        validate: {
-                          checkNewPassConfirmationHandler: (value) => {
-                            const { password } = getValues();
-                            return (
-                              password === value ||
-                              "Newpassword and ConfirmNewPassword doesn't match!!"
-                            );
-                          },
+                  <i className="fa-solid fa-lock position-absolute"></i>
+                  <input
+                    className="form-control bgMain ps-4"
+                    type={passType}
+                    placeholder="Confirm New Password"
+                    {...register("confirmPassword", {
+                      required: true,
+                      pattern:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]{6,}$/,
+                      validate: {
+                        checkNewPassConfirmationHandler: (value) => {
+                          const { password } = getValues();
+                          return (
+                            password === value ||
+                            "Newpassword and ConfirmNewPassword doesn't match!!"
+                          );
                         },
-                      })}
-                    />
-                  {errors.confirmPassword&&(<span className="text-danger">{errors.confirmPassword?.message}</span>)}
-
-                   {errors.confirmPassword && errors.confirmPassword.type === "required" && (
-                    <span className="text-danger">ConfirmPassword is required!!</span>
-                  )}
-                  
-                  {errors.confirmPassword && errors.confirmPassword.type === "pattern" && (
+                      },
+                    })}
+                  />
+                  {errors.confirmPassword && (
                     <span className="text-danger">
-                      The confirmPassword must include at least one lowercase letter,
-                      one uppercase letter, one digit, one special character,
-                      and be at least 6 characters long!!
+                      {errors.confirmPassword?.message}
                     </span>
                   )}
+
+                  {errors.confirmPassword &&
+                    errors.confirmPassword.type === "required" && (
+                      <span className="text-danger">
+                        ConfirmPassword is required!!
+                      </span>
+                    )}
+
+                  {errors.confirmPassword &&
+                    errors.confirmPassword.type === "pattern" && (
+                      <span className="text-danger">
+                        The confirmPassword must include at least one lowercase
+                        letter, one uppercase letter, one digit, one special
+                        character, and be at least 6 characters long!!
+                      </span>
+                    )}
                 </div>
 
                 <div className="form-group my-2">
-                      <input className="mx-1" type="checkbox" name="passType" checked={showPass} 
-                      onChange={(e)=>{
-                        setShowPass((prev)=>!prev); 
-                      }}
-                      />
-                      <label htmlFor="passType">
-                        {showPass ? "hide password" :"show password "}
-                      </label>
-                    </div>
+                  <input
+                    className="mx-1"
+                    type="checkbox"
+                    name="passType"
+                    checked={showPass}
+                    onChange={(e) => {
+                      setShowPass((prev) => !prev);
+                    }}
+                  />
+                  <label htmlFor="passType">
+                    {showPass ? "hide password" : "show password "}
+                  </label>
+                </div>
                 <div className="form-group my-3">
                   <button
                     type="submit"

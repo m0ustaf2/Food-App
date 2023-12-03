@@ -8,9 +8,13 @@ import toast from "react-hot-toast";
 import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashCan } from "react-icons/fa6";
 import noData from "../../../assets/images/nodata.png";
+import { useContext } from "react";
+import { AuthContext } from "../../../Context/AuthContext";
+import Loading from "../../../SharedModule/Components/Loading/Loading";
+import { Helmet } from "react-helmet";
 
 export default function CategoriesList() {
-  const baseUrl = "https://upskilling-egypt.com:443";
+  let { headers, baseUrl } = useContext(AuthContext);
   const [categoriesList, setCategoriesList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modelState, setModelState] = useState("close");
@@ -46,13 +50,8 @@ export default function CategoriesList() {
   const onSubmit = (data) => {
     setIsLoading(true);
     axios
-      .post(`${baseUrl}/api/v1/Category/`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
+      .post(`${baseUrl}/api/v1/Category/`, data, { headers })
       .then((response) => {
-        console.log(response);
         handleClose();
         getCategories();
         setIsLoading(false);
@@ -67,47 +66,38 @@ export default function CategoriesList() {
   };
 
   //-----------------------------------ShowCategories----------------------------
-  const getCategories = (pageNo,name) => {
+  const getCategories = (pageNo, name) => {
+    setIsLoading(true);
     axios
       .get(`${baseUrl}/api/v1/Category/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
         params: {
           pageSize: 5,
           pageNumber: pageNo,
-          name:name
+          name: name,
         },
       })
       .then((response) => {
-        setCategoriesList(response.data.data);
-        console.log(
-          Array(response.data.totalNumberOfPages)
-            .fill()
-            .map((_, i) => i + 1)
-        );
+        setCategoriesList(response?.data?.data);
+        setIsLoading(false);
         setPagesArray(
-          Array(response.data.totalNumberOfPages)
+          Array(response?.data?.totalNumberOfPages)
             .fill()
             .map((_, i) => i + 1)
         );
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Axios Error!!!");
+        toast.error(error?.response?.data?.message || "Axios Error!!!");
+        setIsLoading(false);
       });
   };
   // ----------------------------------deleteCategory------------------------------
   const deleteCategory = () => {
     setIsLoading(true);
     axios
-      .delete(`${baseUrl}/api/v1/Category/${itemId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
+      .delete(`${baseUrl}/api/v1/Category/${itemId}`, { headers })
       .then((response) => {
-        console.log(response);
         handleClose();
         setIsLoading(false);
         toast.success("Category deleted successfully");
@@ -115,7 +105,7 @@ export default function CategoriesList() {
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Axios error!!");
+        toast.error(error?.response?.data?.message || "Axios error!!");
         setIsLoading(false);
       });
   };
@@ -124,36 +114,36 @@ export default function CategoriesList() {
   const updateCategory = (data) => {
     setIsLoading(true);
     axios
-      .put(`${baseUrl}/api/v1/Category/${itemId}`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
+      .put(`${baseUrl}/api/v1/Category/${itemId}`, data, { headers })
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         handleClose();
         setIsLoading(false);
         toast.success("Category updated successfully");
         getCategories();
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Axios error!!");
+        // console.log(error);
+        toast.error(error?.response?.data?.message || "Axios error!!");
         setIsLoading(false);
       });
   };
 
   // *********************searchByName*******************
-  const getNameValue=(input)=>{
-    setSearchString(input.target.value)
-getCategories(1,input.target.value);
-  }
+  const getNameValue = (input) => {
+    setSearchString(input.target.value);
+    getCategories(1, input.target.value);
+  };
   useEffect(() => {
     getCategories(1);
   }, []);
 
   return (
     <>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Categories List</title>
+      </Helmet>
       <Header
         prefix={"Categories"}
         title={"Item"}
@@ -268,51 +258,63 @@ getCategories(1,input.target.value);
           </div>
         </div>
         <div>
-          <input onChange={getNameValue} placeholder="Search by name..." className="form-control my-2" type="text" />
-          {categoriesList.length > 0 ? (
-            <div>
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Category Name</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categoriesList.map((category, index) => (
-                    <tr key={category.id}>
-                      <th scope="row">{index + 1}</th>
-                      <td>{category.name}</td>
-                      <td>
-                        <FaRegEdit
-                          onClick={() => showUpdataModal(category)}
-                          className="text-warning mx-2"
-                        />
-                        <FaRegTrashCan
-                          onClick={() => showDeleteModal(category.id)}
-                          className="text-danger"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <nav aria-label="...">
-                <ul className="pagination pagination-sm">
-                  {pagesArray.map((pageNo ,index)=>
-                    <li key={index}
-                    onClick={()=>getCategories(pageNo,searchString)}
-                    className="page-item">
-                      <a className="page-link">{pageNo}</a>
-                      </li>
-                  )}
-                 
-                </ul>
-              </nav>
-            </div>
+          <input
+            onChange={getNameValue}
+            placeholder="Search by name..."
+            className="form-control my-2"
+            type="text"
+          />
+          {!isLoading ? (
+            <>
+              {categoriesList.length > 0 ? (
+                <div>
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Category Name</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categoriesList.map((category, index) => (
+                        <tr key={category.id}>
+                          <th scope="row">{index + 1}</th>
+                          <td>{category.name}</td>
+                          <td>
+                            <FaRegEdit
+                              onClick={() => showUpdataModal(category)}
+                              className="text-warning mx-2 edit"
+                            />
+                            <FaRegTrashCan
+                              onClick={() => showDeleteModal(category.id)}
+                              className="text-danger del"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <nav className="d-flex justify-content-end" aria-label="...">
+                    <ul className="pagination pagination-sm">
+                      {pagesArray.map((pageNo, index) => (
+                        <li
+                          key={index}
+                          onClick={() => getCategories(pageNo, searchString)}
+                          className="page-item"
+                        >
+                          <a className="page-link">{pageNo}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              ) : (
+                <NoData />
+              )}
+            </>
           ) : (
-            <NoData />
+            <Loading />
           )}
         </div>
       </div>

@@ -8,9 +8,12 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import Modal from "react-bootstrap/Modal";
 import noData from "../../../assets/images/nodata.png";
 import { useForm } from "react-hook-form";
+import { useContext } from "react";
+import { AuthContext } from "../../../Context/AuthContext";
+import Loading from "../../../SharedModule/Components/Loading/Loading";
+import { Helmet } from "react-helmet";
 
 export default function RecipesList() {
-  const baseUrl = "https://upskilling-egypt.com:443";
   const [RecipesList, setRecipesList] = useState([]);
   const [TagsList, setTagsList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
@@ -31,7 +34,7 @@ export default function RecipesList() {
     reset,
     setValue,
   } = useForm();
-  
+  let { headers, baseUrl, HeadersWithContent } = useContext(AuthContext);
   const showDeleteModal = (id) => {
     setItemId(id);
     setModalState("delete-modal");
@@ -61,33 +64,27 @@ export default function RecipesList() {
         `${baseUrl}/api/v1/Recipe/`,
         { ...data, recipeImage: data.recipeImage[0] },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-            "Content-Type": "multipart/form-data",
-          },
+          headers: HeadersWithContent,
         }
       )
       .then((response) => {
-        console.log(response);
         handleClose();
         getAllRecipes();
         setIsLoading(false);
         reset();
-        toast.success(response?.data?.message);
+        toast.success(response?.data?.message || "Recipe created successfully");
       })
       .catch((error) => {
-        console.log(error);
         setIsLoading(false);
-        toast.error("Axios Error!!!");
+        toast.error(error?.response?.data?.message || "Axios Error!!!");
       });
   };
   //--------------------getAllRecipes---------------------
   const getAllRecipes = (pageNo, name, tagId, categoryId) => {
+    setIsLoading(true);
     axios
       .get(`${baseUrl}/api/v1/Recipe/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
         params: {
           pageSize: 5,
           pageNumber: pageNo,
@@ -98,12 +95,7 @@ export default function RecipesList() {
       })
       .then((response) => {
         setRecipesList(response?.data?.data);
-        console.log(response?.data?.data);
-        console.log(
-          Array(response.data.totalNumberOfPages)
-            .fill()
-            .map((_, i) => i + 1)
-        );
+        setIsLoading(false);
         setPagesArray(
           Array(response.data.totalNumberOfPages)
             .fill()
@@ -111,8 +103,8 @@ export default function RecipesList() {
         );
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Axios Error!!!");
+        toast.error(error?.response?.data?.message || "Axios Error!!!");
+        setIsLoading(false);
       });
   };
 
@@ -121,48 +113,40 @@ export default function RecipesList() {
     setIsLoading(true);
     axios
       .delete(`${baseUrl}/api/v1/Recipe/${itemId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
       })
       .then((response) => {
-        console.log(response);
         handleClose();
         setIsLoading(false);
-        toast.success("Recipe deleted successfully");
+        toast.success(response?.data?.message || "Recipe deleted successfully");
         getAllRecipes();
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Axios error!!");
+        toast.error(error?.response?.data?.message || "Axios error!!");
         setIsLoading(false);
       });
   };
   // ---------------------updateRecipe--------------------
   const updateRecipe = (data) => {
-    console.log(data);
+    // console.log(data);
     setIsLoading(true);
     axios
       .put(
         `${baseUrl}/api/v1/Recipe/${itemId}`,
         { ...data, recipeImage: data.recipeImage[0] },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-            "Content-Type": "multipart/form-data",
-          },
+          headers: HeadersWithContent,
         }
       )
       .then((response) => {
-        console.log(response);
         handleClose();
         setIsLoading(false);
         toast.success("Recipe updated successfully");
         getAllRecipes();
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Axios error!!");
+        toast.error(error?.response?.data?.message || "Axios error!!");
         setIsLoading(false);
       });
   };
@@ -171,17 +155,13 @@ export default function RecipesList() {
   const getAllTags = () => {
     axios
       .get(`${baseUrl}/api/v1/tag/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
       })
       .then((response) => {
-        console.log(response.data);
         setTagsList(response?.data);
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Axios Error!!!");
+        toast.error(error?.response?.data?.message || "Axios Error!!!");
       });
   };
 
@@ -189,17 +169,13 @@ export default function RecipesList() {
   const getCategories = () => {
     axios
       .get(`${baseUrl}/api/v1/Category/?pageSize=20&pageNumber=1`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
       })
       .then((response) => {
         setCategoriesList(response?.data?.data);
-        console.log(response?.data?.data);
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Axios Error!!!");
+        toast.error(error?.response?.data?.message || "Axios Error!!!");
       });
   };
   // *********************searchByName*******************
@@ -227,6 +203,10 @@ export default function RecipesList() {
 
   return (
     <>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Recipes List</title>
+      </Helmet>
       <Header
         prefix={"Recipes"}
         title={"Items"}
@@ -586,93 +566,99 @@ export default function RecipesList() {
               </select>
             </div>
           </div>
-          {RecipesList.length > 0 ? (
-            <div>
-              <table className="table table-responsive table-striped ">
-                <thead>
-                  <tr>
-                    <th className="table-secondary p-3" scope="col">
-                      #
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Item Name
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Image
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Price
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Description
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Category
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Tag
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RecipesList.map((Recipe, index) => (
-                    <tr key={Recipe?.id}>
-                      <th scope="row">{index + 1}</th>
-                      <td>{Recipe?.name}</td>
-                      <td>
-                        <div className="img-container">
-                          {Recipe.imagePath ? (
-                            <img
-                              className="img-fluid rounded-2"
-                              src={`${baseUrl}/` + Recipe.imagePath}
-                              alt="recipe-img"
+          {!isLoading ? (
+            <>
+              {RecipesList.length > 0 ? (
+                <div>
+                  <table className="table table-responsive table-striped ">
+                    <thead>
+                      <tr>
+                        <th className="table-secondary p-3" scope="col">
+                          #
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Item Name
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Image
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Price
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Description
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Category
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Tag
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {RecipesList.map((Recipe, index) => (
+                        <tr key={Recipe?.id}>
+                          <th scope="row">{index + 1}</th>
+                          <td>{Recipe?.name}</td>
+                          <td>
+                            <div className="img-container">
+                              {Recipe.imagePath ? (
+                                <img
+                                  className="img-fluid rounded-2"
+                                  src={`${baseUrl}/` + Recipe.imagePath}
+                                  alt="recipe-img"
+                                />
+                              ) : (
+                                <img
+                                  className="img-fluid"
+                                  src={noData}
+                                  alt="recipe-img"
+                                />
+                              )}
+                            </div>
+                          </td>
+                          <td>{Recipe?.price}</td>
+                          <td>{Recipe?.description}</td>
+                          <td>{Recipe?.category[0]?.name}</td>
+                          <td>{Recipe?.tag?.name}</td>
+                          <td>
+                            <FaRegEdit
+                              onClick={() => showUpdateModal(Recipe)}
+                              className="text-warning mx-2 edit"
                             />
-                          ) : (
-                            <img
-                              className="img-fluid"
-                              src={noData}
-                              alt="recipe-img"
+                            <FaRegTrashCan
+                              onClick={() => showDeleteModal(Recipe.id)}
+                              className="text-danger del"
                             />
-                          )}
-                        </div>
-                      </td>
-                      <td>{Recipe?.price}</td>
-                      <td>{Recipe?.description}</td>
-                      <td>{Recipe?.category[0]?.name}</td>
-                      <td>{Recipe?.tag?.name}</td>
-                      <td>
-                        <FaRegEdit
-                          onClick={() => showUpdateModal(Recipe)}
-                          className="text-warning mx-2"
-                        />
-                        <FaRegTrashCan
-                          onClick={() => showDeleteModal(Recipe.id)}
-                          className="text-danger"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <nav aria-label="...">
-                <ul className="pagination pagination-sm">
-                  {pagesArray.map((pageNo, index) => (
-                    <li
-                      key={index}
-                      onClick={() => getAllRecipes(pageNo, searchString)}
-                      className="page-item"
-                    >
-                      <a className="page-link">{pageNo}</a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <nav className="d-flex justify-content-end" aria-label="...">
+                    <ul className="pagination pagination-sm">
+                      {pagesArray.map((pageNo, index) => (
+                        <li
+                          key={index}
+                          onClick={() => getAllRecipes(pageNo, searchString)}
+                          className="page-item"
+                        >
+                          <a className="page-link">{pageNo}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              ) : (
+                <NoData />
+              )}
+            </>
           ) : (
-            <NoData />
+            <Loading />
           )}
         </div>
       </div>

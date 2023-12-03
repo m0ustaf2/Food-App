@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import logo from "../../../assets/images/1.png";
-import { useForm } from "react-hook-form";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
+import { AuthContext } from "../../../Context/AuthContext";
+import logo from "../../../assets/images/1.png";
 export default function ForgetPass({handleClose}) {
-  
+  let {headers,baseUrl}=useContext(AuthContext)
+
   const [isLoading,setIsLoading]=useState(false);
   const [showPass,setShowPass]=useState(false);
   const [passType,setPassType]=useState('password');
 
-  const baseUrl='https://upskilling-egypt.com:443';
-  const navigate=useNavigate();
   const {
     register,
     handleSubmit,
@@ -21,20 +19,17 @@ export default function ForgetPass({handleClose}) {
     getValues
   } = useForm();
   const onSubmit = (data) => {
-    console.log(data);
+    // console.log(data);
     reset() //to Reset-form
     axios.put(`${baseUrl}/api/v1/Users/ChangePassword`,data,{
-      headers:{
-        Authorization:`Bearer ${localStorage.getItem("adminToken")}`
-      }
+      headers
     }).then((response)=>{
-      console.log(response);
+      // console.log(response);
       handleClose()
-      toast.success(response.data.message)
-      // navigate('/login') 
+      toast.success(response.data.message) 
       setIsLoading(false)
     }).catch((error)=>{
-      console.log(error.response);
+      // console.log(error.response);
       toast.error(error.response.data.message)
       setIsLoading(false)
     })
@@ -136,7 +131,7 @@ export default function ForgetPass({handleClose}) {
                 <div className="form-group my-2">
                       <input className="mx-1" type="checkbox" name="passType" checked={showPass} 
                       onChange={(e)=>{
-                        console.log(showPass);
+                        // console.log(showPass);
                         setShowPass((prev)=>!prev); 
                       }}
                       />

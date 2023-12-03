@@ -15,29 +15,15 @@ import MasterLayout from './SharedModule/Components/MasterLayout/MasterLayout';
 import NotFound from './SharedModule/Components/NotFound/NotFound';
 import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
 import UsersList from './UsersModule/Components/UsersList/UsersList';
+import { useContext } from 'react';
+import { AuthContext } from './Context/AuthContext';
+import { Offline } from 'react-detect-offline';
+import Disconnected from './SharedModule/Components/Disconnected/Disconnected';
 
 
 function App() {
-const[adminData,setAdminData]=useState({})
 
-
-let saveAdminData=()=>{
-  let encodedToken=localStorage.getItem('adminToken');
-  try {
-    let decodedToken=jwtDecode(encodedToken);
-    setAdminData(decodedToken)
-  } catch (error) {
-    setAdminData(null)
-  }
-  
-}
-
-useEffect(() => {
- if(localStorage.getItem('adminToken')){
-  saveAdminData();
- }
-}, []);
-
+let{adminData,saveAdminData}=useContext(AuthContext);
 
   const routes=createBrowserRouter([
     {
@@ -70,7 +56,9 @@ useEffect(() => {
     <Toaster/>
     <ToastContainer theme='dark'
     autoClose={2000}/>
+
     <RouterProvider router={routes} />
+    <Offline><Disconnected/></Offline>
     </>
   )
 }

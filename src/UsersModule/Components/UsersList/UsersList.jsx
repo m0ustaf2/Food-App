@@ -6,31 +6,33 @@ import NoData from "../../../SharedModule/Components/NoData/NoData";
 import axios from "axios";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Modal from "react-bootstrap/Modal";
+import { useContext } from "react";
+import { AuthContext } from "../../../Context/AuthContext";
+import Loading from "../../../SharedModule/Components/Loading/Loading";
+import { Helmet } from "react-helmet";
 
 export default function UsersList() {
-  const baseUrl = "https://upskilling-egypt.com:443";
+  let { headers, baseUrl } = useContext(AuthContext);
   const [usersList, setUsersList] = useState([]);
   const [userId, setUserId] = useState(0);
   const [modalState, setModalState] = useState("close");
   const [isLoading, setIsLoading] = useState(false);
   const [pagesArray, setPagesArray] = useState([]);
   const [searchString, setSearchString] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState(0);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   const handleClose = () => setModalState("close");
 
   const showDeleteModal = (id) => {
-    // alert(id)
     setUserId(id);
     setModalState("delete-modal");
   };
   //*****************************GetAllUsers********************************* */
   const getAllUsers = (pageNo, userName, groups) => {
+    setIsLoading(true);
     axios
       .get(`${baseUrl}/api/v1/Users/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
         params: {
           pageSize: 5,
           pageNumber: pageNo,
@@ -40,7 +42,7 @@ export default function UsersList() {
       })
       .then((response) => {
         setUsersList(response?.data?.data);
-        console.log(response?.data);
+        setIsLoading(false);
         console.log(
           Array(response.data.totalNumberOfPages)
             .fill()
@@ -53,15 +55,15 @@ export default function UsersList() {
         );
       })
       .catch((error) => {
-        console.log(error.response.data.message);
-        toast.error(error.response.data.message);
+        toast.error(error?.response?.data?.message);
+        setIsLoading(false);
       });
   };
   // *********************searchByName*******************
   const getNameValue = (input) => {
     console.log(input.target.value);
     setSearchString(input.target.value);
-    getAllUsers(1, input.target.value);
+    getAllUsers(1, input.target.value, selectedGroup);
   };
   // ********************SearchByGroup********************
   const getGroupValue = (select) => {
@@ -73,9 +75,7 @@ export default function UsersList() {
     setIsLoading(true);
     axios
       .delete(`${baseUrl}/api/v1/Users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+        headers,
       })
       .then((response) => {
         console.log(response);
@@ -86,7 +86,7 @@ export default function UsersList() {
       })
       .catch((error) => {
         console.log(error);
-        toast.error(error.response.data.message);
+        toast.error(error?.response?.data?.message || "Axios Error");
         setIsLoading(false);
       });
   };
@@ -95,11 +95,16 @@ export default function UsersList() {
   }, []);
   return (
     <>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Users List</title>
+      </Helmet>
       <Header
         prefix={"Users"}
         title={"List"}
         paragraph={`You can now add your items that any user can order it from the Application and you can edit`}
       />
+
       {/* ************************Delete Modal******************************* */}
       <Modal show={modalState == "delete-modal"} onHide={handleClose}>
         <Modal.Body>
@@ -153,77 +158,85 @@ export default function UsersList() {
               </select>
             </div>
           </div>
-          {usersList.length > 0 ? (
-            <div>
-              <table className="table table-responsive table-striped ">
-                <thead>
-                  <tr>
-                    <th className="table-secondary p-3" scope="col">
-                      #
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      User Name
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Image
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Phone Number
-                    </th>
-                    <th className="table-secondary p-3" scope="col">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usersList.map((User, index) => (
-                    <tr key={User?.id}>
-                      <th scope="row">{index + 1}</th>
-                      <td>{User?.userName}</td>
-                      <td>
-                        <div className="img-container">
-                          {User?.imagePath ? (
-                            <img
-                              className="img-fluid rounded-2"
-                              src={`${baseUrl}/` + User?.imagePath}
-                              alt="user-img"
+          {!isLoading ? (
+            <>
+              {usersList.length > 0 ? (
+                <div>
+                  <table className="table table-responsive table-striped ">
+                    <thead>
+                      <tr>
+                        <th className="table-secondary p-3" scope="col">
+                          #
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          User Name
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Image
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Phone Number
+                        </th>
+                        <th className="table-secondary p-3" scope="col">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersList.map((User, index) => (
+                        <tr key={User?.id}>
+                          <th scope="row">{index + 1}</th>
+                          <td>{User?.userName}</td>
+                          <td>
+                            <div className="img-container">
+                              {User?.imagePath ? (
+                                <img
+                                  className="img-fluid rounded-2"
+                                  src={`${baseUrl}/` + User?.imagePath}
+                                  alt="user-img"
+                                />
+                              ) : (
+                                <img
+                                  className="img-fluid"
+                                  src={noData}
+                                  alt="user-img"
+                                />
+                              )}
+                            </div>
+                          </td>
+                          <td>{User?.phoneNumber}</td>
+                          <td>
+                            <FaRegTrashCan
+                              onClick={() => showDeleteModal(User.id)}
+                              className="text-danger del"
                             />
-                          ) : (
-                            <img
-                              className="img-fluid"
-                              src={noData}
-                              alt="user-img"
-                            />
-                          )}
-                        </div>
-                      </td>
-                      <td>{User?.phoneNumber}</td>
-                      <td>
-                        <FaRegTrashCan
-                          onClick={() => showDeleteModal(User.id)}
-                          className="text-danger"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <nav aria-label="...">
-                <ul className="pagination pagination-sm">
-                  {pagesArray.map((pageNo, index) => (
-                    <li
-                      key={index}
-                      onClick={() => getAllUsers(pageNo, searchString)}
-                      className="page-item"
-                    >
-                      <a className="page-link">{pageNo}</a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <nav className="d-flex justify-content-end" aria-label="...">
+                    <ul className="pagination pagination-sm">
+                      {pagesArray.map((pageNo, index) => (
+                        <li
+                          key={index}
+                          onClick={() =>
+                            getAllUsers(pageNo, searchString, selectedGroup)
+                          }
+                          className="page-item"
+                        >
+                          <a className="page-link">{pageNo}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              ) : (
+                <NoData />
+              )}
+            </>
           ) : (
-            <NoData />
+            <Loading />
           )}
         </div>
       </div>
