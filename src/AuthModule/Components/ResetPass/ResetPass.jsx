@@ -22,13 +22,14 @@ export default function ResetPass() {
     getValues,
   } = useForm();
   const onSubmit = (data) => {
-    console.log(data);
-    reset(); //to Reset-form
+    setIsLoading(true);
+    // console.log(data);
     axios
       .post(`${baseUrl}/api/v1/Users/Reset`, data)
       .then((response) => {
         // console.log(response);
         toast.success(response.data.message);
+        reset(); //to Reset-form
         navigate("/login");
         setIsLoading(false);
       })

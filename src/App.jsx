@@ -32,7 +32,7 @@ let{adminData,saveAdminData}=useContext(AuthContext);
       errorElement:<NotFound/>,
       children:[
         {index:true,element:<Home  adminData={adminData} />},
-        {path:"/",element:<Home  adminData={adminData} />},
+        // {path:"/",element:<Home  adminData={adminData} />},
         {path:'users',element:<UsersList/>},
         {path:'recipes',element:<RecipesList/>},
         {path:'categories',element:<CategoriesList/>},
@@ -59,7 +59,7 @@ let{adminData,saveAdminData}=useContext(AuthContext);
     autoClose={2000}/>
 
     <RouterProvider router={routes} />
-    <Offline><Disconnected/></Offline>
+    {/* <Offline><Disconnected/></Offline> */}
     </>
   )
 }

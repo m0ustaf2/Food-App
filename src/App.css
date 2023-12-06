@@ -138,3 +138,33 @@ textarea {
       transform: translateX(-100%)
     }
   }
+
+  /* table {
+    width: 100%;
+    table-layout: fixed;
+} */
+
+/* th, td {
+    width: 100%; 
+} */
+
+@media only screen and (max-width: 600px) {
+  tr {
+      display: block;
+      margin-bottom: 10px;
+  }
+  thead{
+  table-layout: fixed;
+  width: 55px !important;
+}
+.table-container {
+  overflow-x: auto;
+}
+  td,th,img {
+      /* display: flex; */
+      text-align: left;
+      font-size: 10px;
+      width:70px;
+      table-layout: fixed;
+  }
+}

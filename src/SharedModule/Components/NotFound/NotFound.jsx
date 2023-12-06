@@ -19,7 +19,7 @@ export default function NotFound() {
               We suggest you back to home.
             </span>
             <div className="my-3">
-              <Link to="">
+              <Link to="/">
                 <button className="btn btn-success">
                   {" "}
                   <i className="fa-solid fa-arrow-left"></i> Back to Home

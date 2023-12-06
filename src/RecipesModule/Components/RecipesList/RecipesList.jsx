@@ -471,6 +471,7 @@ export default function RecipesList() {
                   />
                 ) : (
                   <img className="img-fluid" src={noData} alt="recipe-img" />
+                  
                 )}
               </div>
             </div>
@@ -569,8 +570,8 @@ export default function RecipesList() {
           {!isLoading ? (
             <>
               {RecipesList.length > 0 ? (
-                <div>
-                  <table className="table table-responsive table-striped ">
+                <div className="col-md-12">
+                  <table className="table  table-striped ">
                     <thead>
                       <tr>
                         <th className="table-secondary p-3" scope="col">
