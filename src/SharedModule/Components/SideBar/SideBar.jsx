@@ -35,12 +35,13 @@ export default function SideBar() {
         
       </Modal>
    <Sidebar collapsed={isCollapsed}>
+  
   <Menu>
     <div onClick={handleToggle}>
     <img className='w-75' src={logo} alt='logo'/>
     </div>
-  <MenuItem icon={<IoMdHome className='fs-4' />} component={<Link to="/dashboard" />}>Home</MenuItem>
-    <MenuItem icon={<HiMiniUsers className='fs-4' />} component={<Link to="/dashboard/users" />}> Users</MenuItem>
+  <MenuItem  icon={<IoMdHome className='fs-4' />} component={<Link to="/dashboard" />}>Home</MenuItem>
+    <MenuItem  icon={<HiMiniUsers className='fs-4' />} component={<Link to="/dashboard/users" />}> Users</MenuItem>
     <MenuItem icon={<LiaPizzaSliceSolid className='fs-4'/>} component={<Link to="/dashboard/recipes" />}> Recipes</MenuItem>
     <MenuItem icon={<FaCalendarAlt className='fs-4' />} component={<Link to="/dashboard/categories" />}> Categories</MenuItem>
     <MenuItem icon={<FaKey className='fs-4' />} onClick={handleShow}>Change Password</MenuItem>

@@ -12,8 +12,8 @@ export default function MasterLayout({ adminData }) {
           <SideBar />
           </div>
           <div className="w-100">
-            <Navbar adminData={adminData} />
             <div className="container-fluid">
+            <Navbar adminData={adminData} />
             <Outlet />
             </div>
           </div>

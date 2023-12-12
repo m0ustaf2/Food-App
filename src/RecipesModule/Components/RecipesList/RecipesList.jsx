@@ -25,6 +25,8 @@ export default function RecipesList() {
   const [searchString, setSearchString] = useState("");
   const [selectedTagId, setselectedTagId] = useState(0);
   const [selectedCatId, setselectedCatId] = useState(0);
+  const [currentPg, setCurrentPg] = useState(1);
+
 
   const handleClose = () => setModalState("close");
   const {
@@ -42,13 +44,13 @@ export default function RecipesList() {
   const showUpdateModal = (item) => {
     console.log(item);
     setRecipe(item);
-    setItemId(item.id);
-    setValue("name", item.name);
-    setValue("price", item.price);
-    setValue("tagId", item.tag?.id); //tag:{id: 3, name: 'Snack'}
-    setValue("categoriesIds", item.category[0]?.id); //0:{id: 350, name: 'salad'}
-    setValue("description", item.description);
-    setValue("recipeImage", item.recipeImage);
+    setItemId(item?.id);
+    setValue("name", item?.name);
+    setValue("price", item?.price);
+    setValue("tagId", item?.tag?.id); //tag:{id: 3, name: 'Snack'}
+    setValue("categoriesIds", item?.category[0]?.id); //0:{id: 350, name: 'salad'}
+    setValue("description", item?.description);
+    setValue("recipeImage", item?.recipeImage);
     setModalState("update-modal");
   };
 
@@ -80,14 +82,14 @@ export default function RecipesList() {
       });
   };
   //--------------------getAllRecipes---------------------
-  const getAllRecipes = (pageNo, name, tagId, categoryId) => {
+  const getAllRecipes = (currentPg, name, tagId, categoryId) => {
     setIsLoading(true);
     axios
       .get(`${baseUrl}/api/v1/Recipe/`, {
         headers,
         params: {
           pageSize: 5,
-          pageNumber: pageNo,
+          pageNumber: currentPg,
           name: name,
           tagId: tagId,
           categoryId: categoryId,
@@ -107,7 +109,22 @@ export default function RecipesList() {
         setIsLoading(false);
       });
   };
-
+ // --------change-page--------
+ const changePage = (pgindex, searchString) => {
+  console.log(pgindex);
+  setCurrentPg(pgindex);
+  getAllRecipes(pgindex, searchString);
+};
+// --------handle-next-btn--------
+const nextPages = () => {
+  setCurrentPg(parseInt(currentPg) + 1);
+  getAllRecipes(parseInt(currentPg) + 1);
+};
+// --------handle-previous-btn--------
+const previousPages = () => {
+  setCurrentPg(parseInt(currentPg) - 1);
+  getAllRecipes(parseInt(currentPg) - 1);
+};
   // ---------------------deleteRecipe--------------------
   const deleteRecipe = () => {
     setIsLoading(true);
@@ -207,11 +224,14 @@ export default function RecipesList() {
         <meta charSet="utf-8" />
         <title>Recipes List</title>
       </Helmet>
+      <div className="responsiv">
       <Header
         prefix={"Recipes"}
         title={"Items"}
         paragraph={`You can now add your items that any user can order it from the Application and you can edit`}
       />
+
+      </div>
       {/* ************************Add Modal******************************* */}
       <Modal show={modalState == "add-modal"} onHide={handleClose}>
         <Modal.Body>
@@ -522,7 +542,7 @@ export default function RecipesList() {
         </Modal.Body>
       </Modal>
 
-      <div className="row mx-2 p-3">
+      <div className="row mx-2 p-3 responsiv">
         <div className="col-md-6">
           <div>
             <h6 className="fw-bold">Recipes Table Detailes</h6>
@@ -538,17 +558,17 @@ export default function RecipesList() {
         </div>
         <div>
           <div className="row my-2">
-            <div className="col-md-4">
+            <div className="col-md-4 responsiv my-1">
               <input
                 onChange={getNameValue}
                 placeholder="Search by Recipe name..."
-                className="form-control"
+                className="form-control border-success"
                 type="text"
               />
             </div>
-            <div className="col-md-4">
-              <select onChange={getTagValue} className="form-select">
-                <option value={""}>Search by Tagig 👋</option>
+            <div className="col-md-4  responsiv my-1">
+              <select onChange={getTagValue} className="form-select border-success">
+                <option value={""}>Search by Tagig</option>
                 {TagsList.map((tag, index) => (
                   <option value={tag.id} key={index}>
                     {tag.name}
@@ -556,9 +576,9 @@ export default function RecipesList() {
                 ))}
               </select>
             </div>
-            <div className="col-md-4">
-              <select onChange={getCategoryValue} className="form-select">
-                <option value={""}>Search by categoriesIds 👋</option>
+            <div className="col-md-4 responsiv my-1">
+              <select onChange={getCategoryValue} className="form-select border-success">
+                <option value={""}>Search by categoriesIds</option>
                 {categoriesList.map((category, index) => (
                   <option value={category.id} key={index}>
                     {category.name}
@@ -571,31 +591,32 @@ export default function RecipesList() {
             <>
               {RecipesList.length > 0 ? (
                 <div className="col-md-12">
-                  <table className="table  table-striped ">
+                  <div className="table-responsive tble-res ">
+                  <table className="table table-responsive  table-striped table-success">
                     <thead>
                       <tr>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           #
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Item Name
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Image
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Price
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Description
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Category
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Tag
                         </th>
-                        <th className="table-secondary p-3" scope="col">
+                        <th className="table-secondary" scope="col">
                           Actions
                         </th>
                       </tr>
@@ -640,19 +661,29 @@ export default function RecipesList() {
                       ))}
                     </tbody>
                   </table>
-                  <nav className="d-flex justify-content-end" aria-label="...">
-                    <ul className="pagination pagination-sm">
+                  <nav className="d-flex justify-content-center">
+                  <ul className="pagination pagination-sm">
+                      <li className={currentPg <= 1 ? "disabled  page-item":"page-item" }>
+                        <a className="page-link pag" onClick={()=>previousPages()}>Previous</a>
+                      </li>
                       {pagesArray.map((pageNo, index) => (
                         <li
                           key={index}
-                          onClick={() => getAllRecipes(pageNo, searchString)}
-                          className="page-item"
+                          onClick={() => changePage(pageNo, searchString)}
+                          className={pageNo ==currentPg ? "active page-item":"page-item" }
                         >
-                          <a className="page-link">{pageNo}</a>
+                          <a className="page-link pag">{pageNo}</a>
                         </li>
                       ))}
+                      <li className={currentPg >= pagesArray.length ? "disabled page-item":"page-item" }>
+                        <a className="page-link pag" onClick={()=>nextPages()}>
+                          Next
+                        </a>
+                      </li>
                     </ul>
                   </nav>
+                  </div>
+                 
                 </div>
               ) : (
                 <NoData />

@@ -21,6 +21,7 @@ export default function CategoriesList() {
   const [itemId, setItemId] = useState(0);
   const [pagesArray, setPagesArray] = useState([]);
   const [searchString, setSearchString] = useState("");
+  const [currentPg, setCurrentPg] = useState(1);
 
   const showAddModal = () => {
     setModelState("modal-one");
@@ -66,14 +67,14 @@ export default function CategoriesList() {
   };
 
   //-----------------------------------ShowCategories----------------------------
-  const getCategories = (pageNo, name) => {
+  const getCategories = (currentPg, name) => {
     setIsLoading(true);
     axios
       .get(`${baseUrl}/api/v1/Category/`, {
         headers,
         params: {
           pageSize: 5,
-          pageNumber: pageNo,
+          pageNumber: currentPg,
           name: name,
         },
       })
@@ -91,6 +92,23 @@ export default function CategoriesList() {
         toast.error(error?.response?.data?.message || "Axios Error!!!");
         setIsLoading(false);
       });
+  };
+
+  // --------change-page--------
+  const changePage = (pgindex, searchString) => {
+    console.log(pgindex);
+    setCurrentPg(pgindex);
+    getCategories(pgindex, searchString);
+  };
+  // --------handle-next-btn--------
+  const nextPages = () => {
+    setCurrentPg(parseInt(currentPg) + 1);
+    getCategories(parseInt(currentPg) + 1);
+  };
+  // --------handle-previous-btn--------
+  const previousPages = () => {
+    setCurrentPg(parseInt(currentPg) - 1);
+    getCategories(parseInt(currentPg) - 1);
   };
   // ----------------------------------deleteCategory------------------------------
   const deleteCategory = () => {
@@ -261,19 +279,25 @@ export default function CategoriesList() {
           <input
             onChange={getNameValue}
             placeholder="Search by name..."
-            className="form-control my-2"
+            className="form-control my-2 border-success"
             type="text"
           />
           {!isLoading ? (
             <>
               {categoriesList.length > 0 ? (
                 <div>
-                  <table className="table table-striped">
+                  <table className="table table-striped table-success">
                     <thead>
                       <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Category Name</th>
-                        <th scope="col">Actions</th>
+                        <th className="table-secondary" scope="col">
+                          #
+                        </th>
+                        <th className="table-secondary" scope="col">
+                          Category Name
+                        </th>
+                        <th className="table-secondary" scope="col">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -295,17 +319,27 @@ export default function CategoriesList() {
                       ))}
                     </tbody>
                   </table>
-                  <nav className="d-flex justify-content-end" aria-label="...">
+                  <nav
+                    className="d-flex justify-content-center"
+                  >
                     <ul className="pagination pagination-sm">
+                      <li className={currentPg <= 1 ? "disabled  page-item":"page-item" }>
+                        <a className="page-link pag" onClick={()=>previousPages()}>Previous</a>
+                      </li>
                       {pagesArray.map((pageNo, index) => (
                         <li
                           key={index}
-                          onClick={() => getCategories(pageNo, searchString)}
-                          className="page-item"
+                          onClick={() => changePage(pageNo, searchString)}
+                          className={pageNo ==currentPg ? "active page-item":"page-item" }
                         >
-                          <a className="page-link">{pageNo}</a>
+                          <a className="page-link pag">{pageNo}</a>
                         </li>
                       ))}
+                      <li className={currentPg >= pagesArray.length ? "disabled page-item":"page-item" }>
+                        <a className="page-link pag" onClick={()=>nextPages()}>
+                          Next
+                        </a>
+                      </li>
                     </ul>
                   </nav>
                 </div>

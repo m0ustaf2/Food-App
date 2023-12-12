@@ -1,7 +1,7 @@
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, createHashRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import './App.css';
 import Login from './AuthModule/Components/Login/Login';
@@ -25,14 +25,13 @@ function App() {
 
 let{adminData,saveAdminData}=useContext(AuthContext);
 
-  const routes=createBrowserRouter([
+  const routes=createHashRouter([
     {
       path:"/dashboard",
       element:<ProtectedRoute adminData={adminData}><MasterLayout adminData={adminData}/></ProtectedRoute>,
       errorElement:<NotFound/>,
       children:[
         {index:true,element:<Home  adminData={adminData} />},
-        // {path:"/",element:<Home  adminData={adminData} />},
         {path:'users',element:<UsersList/>},
         {path:'recipes',element:<RecipesList/>},
         {path:'categories',element:<CategoriesList/>},
